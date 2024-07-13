@@ -82,10 +82,28 @@ async function init() {
     const fragmentFile = document.getElementById("fragmentFile").files[0];
 
     const fragmentValue = inputType.checked ? fragmentFile : fragmentText.value;
-    const contentType = inputType.checked ? fragmentFile.type : textContentType.value;
 
+    let contentType = "";
     console.log("fragmentValue::"+fragmentValue)
-    console.log("contentType::"+contentType)
+
+    if (inputType.checked) {
+      const fileName = fragmentFile.name.toLowerCase();
+      if (fileName.endsWith('.md')) {
+          contentType = 'text/markdown';
+      } else if (fileName.endsWith('.txt')) {
+          contentType = 'text/plain';
+      } else if (fileName.endsWith('.csv')) {
+          contentType = 'text/csv';
+      } else if (fileName.endsWith('.json')) {
+          contentType = 'application/json';
+      } else if (fileName.endsWith('.html')) {
+          contentType = 'text/html';
+      } else {
+          contentType = fragmentFile.type;
+      }
+  } else {
+      contentType = textContentType.value; 
+  }
 
     const res = await postUserFragment(user, fragmentValue, contentType);
     
