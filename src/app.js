@@ -42,41 +42,59 @@ async function init() {
   // Disable the Login button
   loginBtn.disabled = true;
 
-  // Do an authenticated request to the fragments API server and log the result
-  const userFragments = await getUserFragments(user);
 
-  const yourFragments = document.getElementById("yourFragments");
+  //Form Inputs
+  const fragmentText = document.getElementById("fragmentText");
+  const fragmentFile = document.getElementById("fragmentFile");
+  const inputType = document.getElementById("inputType");
+  const textContentType = document.getElementById("textContentType");
 
-  //console.log(userFragments.fragments)
-
-  if(userFragments.fragments.length === 0){
-    const notFound = document.createElement("p");
-    notFound.innerText = "No fragments found";
-    yourFragments.appendChild(notFound);
-  }
-  else{
-    for (const fragment of userFragments.fragments) {
-      const fragmentElement = document.createElement("li");
-      fragmentElement.innerText = fragment;
-      yourFragments.appendChild(fragmentElement);
+  fragmentFile.disabled = true;
+  fragmentFile.style.visibility = "hidden";
+  
+  inputType.addEventListener("change", function (e) {
+    
+    if (inputType.checked) {
+      fragmentText.disabled =true;
+      fragmentText.style.display = "none";
+      textContentType.style.display = "none";
+      fragmentFile.disabled = false;
+      fragmentFile.style.visibility = "visible";
+    } else {
+      fragmentText.disabled = false;
+      fragmentText.style.display = "block";
+      textContentType.style.display = "block";
+      fragmentFile.disabled = true;
+      fragmentFile.style.visibility = "hidden";
     }
-  }
+  });
 
-  // for (const fragment of userFragments) {
-  //   console.log(fragment);
-  // }
+  
+
+  // Display the user's fragments
+  displayFragments(user);
 
 
   document.getElementById("myForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const fragmentText = document.getElementById("fragmentText");
+    const fragmentFile = document.getElementById("fragmentFile").files[0];
 
-    const res = await postUserFragment(user, fragmentText.value);
+    const fragmentValue = inputType.checked ? fragmentFile : fragmentText.value;
+    const contentType = inputType.checked ? fragmentFile.type : textContentType.value;
+
+    console.log("fragmentValue::"+fragmentValue)
+    console.log("contentType::"+contentType)
+
+    const res = await postUserFragment(user, fragmentValue, contentType);
+    
     console.log("res::"+res.status)
 
     if (res.status == "ok") {
-      console.log("Fragment posted successfully");
+      console.log("Fragment posted successfully")
+      //refresh
+      displayFragments(user);
       //set fragment to blank again
       fragmentText.value = "";
     } else {
@@ -86,8 +104,30 @@ async function init() {
 
   });
 
-  // TODO: later in the course, we will show all the user's fragments in the HTML...
 
+  
+}
+
+async function displayFragments(user) {
+  // Do an authenticated request to the fragments API server and log the result
+  const userFragments = await getUserFragments(user);
+
+  const yourFragments = document.getElementById("yourFragments");
+  yourFragments.innerHTML = "";
+  
+  if(userFragments.fragments.length === 0){
+    const notFound = document.createElement("p");
+    notFound.innerText = "No fragments found";
+    yourFragments.appendChild(notFound);
+  }
+  else{
+    for (const fragment of userFragments.fragments) {
+      const fragmentElement = document.createElement("pre");
+      fragmentElement.style.marginBottom = "5px";
+      fragmentElement.innerText = JSON.stringify(fragment, undefined, 2);
+      yourFragments.appendChild(fragmentElement);
+    }
+  }
 }
 
 // Wait for the DOM to be ready, then start the app
