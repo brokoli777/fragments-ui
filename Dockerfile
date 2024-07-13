@@ -1,5 +1,5 @@
 # Stage 1
-FROM node:node:20-alpine3.19 as build
+FROM node:20-alpine3.19 as build
 
 WORKDIR /app
 
@@ -9,15 +9,13 @@ COPY package*.json ./
 RUN npm install
 
 # Copy all the files
-COPY . .
+COPY ./src ./src
 
-RUN npm run build
-
-# Stage 2: Serving webiste using Nginx
+# Stage 2: serving webiste using Nginx
 FROM nginx:1.27.0-alpine
 
 # Copy the built app to the Nginx server
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app /usr/share/nginx/html
 
 EXPOSE 80
 
