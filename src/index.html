@@ -22,9 +22,10 @@
           <label for="inputType">File Input?</label>
         </div>
 
-        <input type="text" id="fragmentText" placeholder="Enter Text here" style="width: 90%; margin-bottom: 7px">
+        <!-- <input type="text" id="fragmentText" placeholder="Enter Text here" style="width: 95%; margin-bottom: 7px"> -->
+        <textarea id="fragmentText" placeholder="Enter Text here" style="width: 95%; margin-bottom: 7px" rows="4" cols="60"></textarea>
         <Label>Select the Content Type</Label>
-        <select name="textContentType" id="textContentType" style="width: 90%; margin-bottom: -20px;">
+        <select name="textContentType" id="textContentType" style="width: 95%; margin-bottom: -20px;">
           <option value="text/plain">text/plain</option>
           <option value="text/markdown">text/markdown</option>
           <option value="text/html">text/html</option>
@@ -32,9 +33,69 @@
           <option value="application/json">application/json</option>
           <option value="application/yaml">application/yaml</option>
         </select>
-        <input type="file" id="fragmentFile" disabled=true accept=".txt,.html,.json,.md,.csv,.yaml,.yml" style="width: 90%; margin-bottom: 7px">
+        <input type="file" id="fragmentFile" disabled=true accept=".txt,.html,.json,.md,.csv,.yaml,.yml,.png,.jpg,.webp,.gif,.avif" style="width: 95%; margin-bottom: 7px">
         <button>Create Fragment</button>
         <br>
+      </form>
+
+      <br>
+
+      <form id="updateForm" style="border: 2px solid white; border-radius: 10px; padding-left: 15px; padding-bottom: 20px;">
+        <h3>Update Fragment</h3>
+
+      <label for="fragmentID">Fragment ID</label>
+      <input type="text" name="fragmentID" id="updateFragmentID" style="width: 95%; margin-bottom: 7px">
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 7px">
+          <input type="checkbox" name="Input Type" id="updateInputType">
+          <label for="updateInputType">File Input?</label>
+        </div>
+
+        <!-- <input type="text" id="updateFragmentText" placeholder="Enter Text here" style="width: 95%; margin-bottom: 7px"> -->
+         <textarea id="updateFragmentText" placeholder="Enter Text here" style="width: 95%; margin-bottom: 7px" rows="4" cols="50"></textarea>
+        <Label>Select the Content Type</Label>
+        <select name="updateTextContentType" id="updateTextContentType" style="width: 95%; margin-bottom: -20px;">
+          <option value="text/plain">text/plain</option>
+          <option value="text/markdown">text/markdown</option>
+          <option value="text/html">text/html</option>
+          <option value="text/csv">text/csv</option>
+          <option value="application/json">application/json</option>
+          <option value="application/yaml">application/yaml</option>
+        </select>
+
+        <input type="file" id="updateFragmentFile" disabled=true accept=".txt,.html,.json,.md,.csv,.yaml,.yml" style="width: 95%; margin-bottom: 7px">
+        <button>Update Fragment</button>
+        <br>
+      </form>
+
+      <br>
+
+      <form id="deleteForm" style="border: 2px solid white; border-radius: 10px; padding-left: 15px; padding-bottom: 20px;">
+        <h3>Delete Fragment</h3>
+
+      <label for="fragmentID">Fragment ID</label>
+      <input type="text" name="fragmentID" id="deleteFragmentID" style="width: 95%; margin-bottom: 7px">
+        
+      <button>Delete Fragment</button>
+        <br>
+      </form>
+
+      <br>
+
+      <form id="getForm" style="border: 2px solid white; border-radius: 10px; padding-left: 15px; padding-bottom: 20px;">
+        <h3>Get Fragment</h3>
+         
+        <label for="fragmentID">Fragment ID</label>
+        <input type="text" name="fragmentID" id="getFragmentID" style="width: 95%; margin-bottom: 7px">
+
+        <button style="margin-bottom: 7px">Get Fragment</button>
+
+
+        <p>Your Fragment will be displayed below:</p>
+
+        <img src="#" alt="" id="getImage">
+        <div id="getFragmentText" style="padding-right: 10px; background-color:black; width: 95%"></div>
+
       </form>
 
       <br>

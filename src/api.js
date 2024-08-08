@@ -38,7 +38,6 @@ export async function postUserFragment(user, fragmentText, contentType) {
         ...user.authorizationHeaders(),
         'Content-Type': contentType,
       },
-      // body: JSON.stringify({ fragment: fragmentText }),
       body: fragmentText
     });
     
@@ -51,5 +50,87 @@ export async function postUserFragment(user, fragmentText, contentType) {
     return data;
   } catch (err) {
     console.error('Error creating new fragment', { err });
+  }
+}
+
+export async function deleteFragment(user, fragmentId) {
+  console.log('Deleting user fragment data...');
+  try {
+    const res = await fetch(`${apiUrl}/v1/fragments/${fragmentId}`, {
+      method: 'DELETE',
+      headers: user.authorizationHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    console.log('Successfully deleted user fragment data');
+    return data;
+
+  } catch (err) {
+    console.error('Error deleting fragment', { err });
+  }
+}
+
+export async function updateFragment(user, fragmentId, fragmentText, contentType) {
+  console.log('Updating user fragment data...');
+
+  console.log("fragmentText:", fragmentText);
+  try {
+    const res = await fetch(`${apiUrl}/v1/fragments/${fragmentId}`, {
+      method: 'PUT',
+      headers: {
+        ...user.authorizationHeaders(),
+        'Content-Type': contentType,
+      },
+      body: fragmentText
+    });
+
+    console.log('Response', res);
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    console.log('Successfully updated user fragment data', { data });
+    return data;
+  } catch (err) {
+    console.error('Error updating fragment', { err });
+  }
+}
+
+export async function getFragment(user, fragmentId) {
+  console.log('GET user fragment data...', fragmentId);
+  try {
+
+    const res = await fetch(`${apiUrl}/v1/fragments/${fragmentId}`, {
+      headers: user.authorizationHeaders(),
+    });
+
+    console.log('Response', res);
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+    
+    const contentType = res.headers.get('Content-Type');
+    console.log('Content-Type:', contentType);
+
+    if (contentType && contentType.startsWith('image/')) {
+      // Handle image response
+      const imageUrl = URL.createObjectURL(await res.blob());
+      console.log('Image URL:', imageUrl);
+      document.getElementById('getImage').src = imageUrl;
+      document.getElementById('getFragmentText').innerHTML = '';
+    } else {
+      document.getElementById('getImage').src = '';
+      const data = await res.text();
+      console.log("text data", data);
+      document.getElementById('getFragmentText').innerHTML = data;
+    }
+
+    alert('Fragment retrieved successfully');
+  } catch (err) {
+    console.error('Error getting fragment', { err });
   }
 }

@@ -1,14 +1,20 @@
 // src/app.js
 
-import { Auth, getUser } from './auth';
+import { Auth, getUser } from "./auth";
 
-import { getUserFragments, postUserFragment } from './api';
+import {
+  getUserFragments,
+  postUserFragment,
+  updateFragment,
+  deleteFragment,
+  getFragment,
+} from "./api";
 
 async function init() {
   // Get our UI elements
-  const userSection = document.querySelector('#user');
-  const loginBtn = document.querySelector('#login');
-  const logoutBtn = document.querySelector('#logout');
+  const userSection = document.querySelector("#user");
+  const loginBtn = document.querySelector("#login");
+  const logoutBtn = document.querySelector("#logout");
 
   // Wire up event handlers to deal with login and logout.
   loginBtn.onclick = () => {
@@ -23,7 +29,7 @@ async function init() {
   };
 
   // See if we're signed in (i.e., we'll have a `user` object)
-  const user = await getUser();
+  user = await getUser();
   if (!user) {
     // Disable the Logout button
     logoutBtn.disabled = true;
@@ -37,11 +43,10 @@ async function init() {
   userSection.hidden = false;
 
   // Show the user's username
-  userSection.querySelector('.username').innerText = user.username;
+  userSection.querySelector(".username").innerText = user.username;
 
   // Disable the Login button
   loginBtn.disabled = true;
-
 
   //Form Inputs
   const fragmentText = document.getElementById("fragmentText");
@@ -49,13 +54,23 @@ async function init() {
   const inputType = document.getElementById("inputType");
   const textContentType = document.getElementById("textContentType");
 
+  const updateInputType = document.getElementById("updateInputType");
+  const updateFragmentId = document.getElementById("updateFragmentID");
+  const updateFragmentText = document.getElementById("updateFragmentText");
+  const updateFragmentFile = document.getElementById("updateFragmentFile");
+  const updateTextContentType = document.getElementById(
+    "updateTextContentType"
+  );
+
   fragmentFile.disabled = true;
   fragmentFile.style.visibility = "hidden";
-  
+
+  updateFragmentFile.disabled = true;
+  updateFragmentFile.style.visibility = "hidden";
+
   inputType.addEventListener("change", function (e) {
-    
     if (inputType.checked) {
-      fragmentText.disabled =true;
+      fragmentText.disabled = true;
       fragmentText.style.display = "none";
       textContentType.style.display = "none";
       fragmentFile.disabled = false;
@@ -69,13 +84,27 @@ async function init() {
     }
   });
 
-  
+  updateInputType.addEventListener("change", function (e) {
+    if (updateInputType.checked) {
+      updateFragmentText.style.display = "none";
+      updateFragmentId.style.display = "none";
+      updateTextContentType.style.display = "none";
+      updateFragmentFile.style.visibility = "visible";
+    } else {
+      updateFragmentText.style.display = "block";
+      updateFragmentId.style.display = "block";
+      updateTextContentType.style.display = "block";
+      updateFragmentFile.style.visibility = "hidden";
+    }
+  });
 
   // Display the user's fragments
   displayFragments(user);
+}
 
-
-  document.getElementById("myForm").addEventListener("submit", async function (e) {
+document
+  .getElementById("myForm")
+  .addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const fragmentText = document.getElementById("fragmentText");
@@ -84,47 +113,134 @@ async function init() {
     const fragmentValue = inputType.checked ? fragmentFile : fragmentText.value;
 
     let contentType = "";
-    console.log("fragmentValue::"+fragmentValue)
+    console.log("fragmentValue::" + fragmentValue);
 
     if (inputType.checked) {
       const fileName = fragmentFile.name.toLowerCase();
-      if (fileName.endsWith('.md')) {
-          contentType = 'text/markdown';
-      } else if (fileName.endsWith('.txt')) {
-          contentType = 'text/plain';
-      } else if (fileName.endsWith('.csv')) {
-          contentType = 'text/csv';
-      } else if (fileName.endsWith('.json')) {
-          contentType = 'application/json';
-      } else if (fileName.endsWith('.html')) {
-          contentType = 'text/html';
+      if (fileName.endsWith(".md")) {
+        contentType = "text/markdown";
+      } else if (fileName.endsWith(".txt")) {
+        contentType = "text/plain";
+      } else if (fileName.endsWith(".csv")) {
+        contentType = "text/csv";
+      } else if (fileName.endsWith(".json")) {
+        contentType = "application/json";
+      } else if (fileName.endsWith(".html")) {
+        contentType = "text/html";
       } else {
-          contentType = fragmentFile.type;
+        contentType = fragmentFile.type;
       }
-  } else {
-      contentType = textContentType.value; 
-  }
+    } else {
+      contentType = textContentType.value;
+    }
 
     const res = await postUserFragment(user, fragmentValue, contentType);
-    
-    console.log("res::"+res.status)
 
-    if (res.status == "ok") {
-      console.log("Fragment posted successfully")
+    console.log("res::" + res.status);
+
+    if (res && res.status === "ok") {
+      console.log("Fragment posted successfully");
+      alert("Fragment posted successfully");
       //refresh
       displayFragments(user);
       //set fragment to blank again
       fragmentText.value = "";
     } else {
-      console.log("Error posting fragment");
+      console.error("Error posting fragment");
     }
-
-
   });
 
+const updateForm = document.getElementById("updateForm");
 
-  
-}
+updateForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const updateInputType = document.getElementById("updateInputType");
+  const updateFragmentId = document.getElementById("updateFragmentID").value;
+  const updateFragmentText =
+    document.getElementById("updateFragmentText").value;
+  const updateFragmentFile =
+    document.getElementById("updateFragmentFile").files[0];
+  const updateTextContentType = document.getElementById(
+    "updateTextContentType"
+  );
+
+  console.log("updateFragmentId: " + updateFragmentId);
+  console.log("updateFragmentText: " + updateFragmentText);
+
+  const fragmentValue = updateInputType.checked
+    ? updateFragmentFile
+    : updateFragmentText;
+
+  let contentType = "";
+  console.log("fragmentValue::" + fragmentValue);
+
+  //exception for .md files
+  if (updateInputType.checked) {
+    const fileName = updateFragmentFile.name.toLowerCase();
+    if (fileName.endsWith(".md")) {
+      contentType = "text/markdown";
+    } else {
+      contentType = updateFragmentFile.type;
+    }
+  } else {
+    contentType = updateTextContentType.value;
+  }
+
+  const res = await updateFragment(
+    user,
+    updateFragmentId,
+    fragmentValue,
+    contentType
+  );
+  if (res.status === "ok") {
+    console.log("Fragment updated successfully");
+    //refresh
+    displayFragments(user);
+    fragmentText.value = "";
+
+    alert("Fragment updated successfully");
+  } else {
+    data = await res.json();
+    console.error("Error updating fragment" + data);
+    alert("Error updating fragment");
+  }
+});
+
+const deleteForm = document.getElementById("deleteForm");
+
+deleteForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const fragmentId = document.getElementById("deleteFragmentID").value;
+
+  const res = await deleteFragment(user, fragmentId);
+  if (res && res.status === "ok") {
+    console.log("Fragment deleted successfully");
+    //refresh
+    displayFragments(user);
+    //set fragment to blank again
+    fragmentText.value = "";
+
+    alert("Fragment deleted successfully");
+  } else {
+    console.error("Error deleting fragment");
+    alert("Error deleting fragment");
+  }
+});
+
+const getForm = document.getElementById("getForm");
+
+getForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  console.log("getForm");
+
+  const fragmentId = document.getElementById("getFragmentID").value;
+
+  await getFragment(user, fragmentId);
+
+});
 
 async function displayFragments(user) {
   // Do an authenticated request to the fragments API server and log the result
@@ -132,13 +248,12 @@ async function displayFragments(user) {
 
   const yourFragments = document.getElementById("yourFragments");
   yourFragments.innerHTML = "";
-  
-  if(userFragments.fragments.length === 0){
+
+  if (userFragments.fragments.length === 0) {
     const notFound = document.createElement("p");
     notFound.innerText = "No fragments found";
     yourFragments.appendChild(notFound);
-  }
-  else{
+  } else {
     for (const fragment of userFragments.fragments) {
       const fragmentElement = document.createElement("pre");
       fragmentElement.style.marginBottom = "5px";
@@ -149,4 +264,4 @@ async function displayFragments(user) {
 }
 
 // Wait for the DOM to be ready, then start the app
-addEventListener('DOMContentLoaded', init);
+addEventListener("DOMContentLoaded", init);
